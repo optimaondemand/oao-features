@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quote Sequencing Activity — Optima</title>
+<link href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;600;700;800&family=Wix+Madefor+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Wix Madefor Text', sans-serif;
+    background: #f0f3f9;
+    min-height: 100vh;
+    padding: 28px 20px 48px;
+    color: #1a2a4a;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: #0E1C42;
+    border-radius: 14px;
+    padding: 26px 32px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .header-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: #55C8E8;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .header-text .tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: #55C8E8;
+    margin-bottom: 6px;
+  }
+
+  .header-text h1 {
+    font-family: 'Wix Madefor Display', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .header-text p {
+    font-size: 13.5px;
+    color: #a8bcd8;
+    line-height: 1.65;
+  }
+
+  /* ── Layout ── */
+  .workspace {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 620px) {
+    .workspace { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #dce5f0;
+  }
+
+  .panel-label {
+    font-family: 'Wix Madefor Display', sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: #0E1C42;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 2.5px solid #55C8E8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-label .count-badge {
+    background: #55C8E8;
+    color: #0E1C42;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  .drop-zone {
+    min-height: 380px;
+    border-radius: 8px;
+    border: 2px dashed #d4ddef;
+    padding: 8px;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  .drop-zone.drag-over {
+    border-color: #55C8E8;
+    background: #edfafe;
+  }
+
+  .empty-hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #b0bfd8;
+    font-size: 13px;
+    font-style: italic;
+    pointer-events: none;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .empty-hint .arrow { font-size: 24px; }
+
+  /* ── Quote Cards ── */
+  .quote-card {
+    background: white;
+    border: 2px solid #e4ecf5;
+    border-left: 5px solid #55C8E8;
+    border-radius: 9px;
+    padding: 13px 14px 13px 14px;
+    margin-bottom: 9px;
+    cursor: grab;
+    transition: box-shadow 0.2s, transform 0.15s, border-color 0.2s, background 0.2s;
+    user-select: none;
+    position: relative;
+  }
+
+  .quote-card:last-child { margin-bottom: 0; }
+
+  .quote-card:hover {
+    box-shadow: 0 5px 18px rgba(14,28,66,0.11);
+    transform: translateY(-2px);
+    border-color: #55C8E8;
+  }
+
+  .quote-card.dragging {
+    opacity: 0.4;
+    transform: scale(0.97);
+    cursor: grabbing;
+  }
+
+  .quote-card.correct {
+    border-left-color: #76C043;
+    border-color: #c2e59a;
+    background: #f4fbec;
+  }
+
+  .quote-card.incorrect {
+    border-left-color: #F78F1E;
+    border-color: #fcd4a0;
+    background: #fffaf3;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 9px;
+  }
+
+  .quote-id-badge {
+    display: inline-block;
+    background: #0E1C42;
+    color: white;
+    font-family: 'Wix Madefor Display', sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 3px 9px;
+    border-radius: 5px;
+  }
+
+  .position-badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #0E1C42;
+    color: white;
+    font-family: 'Wix Madefor Display', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .quote-card.correct .position-badge { background: #76C043; }
+  .quote-card.incorrect .position-badge { background: #F78F1E; }
+
+  .quote-text {
+    font-family: 'Wix Madefor Text', sans-serif;
+    font-size: 13px;
+    font-style: italic;
+    color: #1a2a4a;
+    line-height: 1.65;
+    margin-bottom: 8px;
+  }
+
+  .quote-attr {
+    font-family: 'Wix Madefor Text', sans-serif;
+    font-size: 11.5px;
+    color: #7a8fae;
+    font-weight: 600;
+  }
+
+  .drag-handle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #c0cfe4;
+    font-size: 16px;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  /* ── Progress ── */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    justify-content: center;
+  }
+
+  .progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #d8e2ef;
+    transition: background 0.3s;
+  }
+
+  .progress-dot.filled { background: #55C8E8; }
+  .progress-dot.all-filled { background: #76C043; }
+
+  /* ── Buttons ── */
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .btn {
+    font-family: 'Wix Madefor Display', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 13px 30px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: background 0.18s, transform 0.1s, box-shadow 0.18s;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: #0E1C42;
+    color: white;
+    box-shadow: 0 2px 10px rgba(14,28,66,0.18);
+  }
+  .btn-primary:hover { background: #1a3060; box-shadow: 0 4px 16px rgba(14,28,66,0.22); }
+  .btn-primary:disabled { background: #8a9db8; cursor: not-allowed; box-shadow: none; }
+
+  .btn-ghost {
+    background: #eaeff8;
+    color: #0E1C42;
+  }
+  .btn-ghost:hover { background: #d8e1ef; }
+
+  /* ── Feedback ── */
+  .feedback {
+    border-radius: 10px;
+    padding: 18px 22px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .feedback.show { display: block; }
+
+  .feedback.success {
+    background: #f2fbea;
+    border-left: 5px solid #76C043;
+  }
+
+  .feedback.partial {
+    background: #fff8f0;
+    border-left: 5px solid #F78F1E;
+  }
+
+  .feedback.warning {
+    background: #fff3e0;
+    border-left: 5px solid #F78F1E;
+  }
+
+  .feedback .score-line {
+    font-family: 'Wix Madefor Display', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: #0E1C42;
+    margin-bottom: 6px;
+  }
+
+  .feedback .detail {
+    font-size: 13.5px;
+    color: #3a4a6a;
+    line-height: 1.65;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">📖</div>
+  <div class="header-text">
+    <div class="tag">Reading Comprehension · Sequencing Activity</div>
+    <h1>Put the Story Back Together</h1>
+    <p>Five quotes from <em>The Great Gatsby</em> have been shuffled. Drag each card from the <strong style="color:white;">Quote Bank</strong> into <strong style="color:white;">Your Order</strong> and arrange them as they appear in the novel — earliest first.</p>
+  </div>
+</div>
+
+<div class="workspace">
+  <!-- Quote Bank -->
+  <div class="panel">
+    <div class="panel-label">
+      Quote Bank
+      <span class="count-badge" id="bank-count">5</span>
+    </div>
+    <div class="drop-zone" id="source-zone" ondragover="onDragOver(event)" ondrop="onDrop(event,'source')" ondragleave="onDragLeave(event)">
+      <div class="empty-hint" id="bank-empty" style="display:none;">
+        <span class="arrow">✓</span>
+        <span>All quotes have been placed!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Answer Zone -->
+  <div class="panel">
+    <div class="panel-label">
+      Your Order <span style="color:#7a8fae;font-weight:400;font-size:10px;">(1 = First)</span>
+      <span class="count-badge" id="answer-count">0/5</span>
+    </div>
+    <div class="drop-zone" id="answer-zone" ondragover="onDragOver(event)" ondrop="onDrop(event,'answer')" ondragleave="onDragLeave(event)">
+      <div class="empty-hint" id="answer-empty">
+        <span class="arrow">←</span>
+        <span>Drag quotes here<br>and arrange them in order</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="progress-row" id="progress-row">
+  <div class="progress-dot" id="pd0"></div>
+  <div class="progress-dot" id="pd1"></div>
+  <div class="progress-dot" id="pd2"></div>
+  <div class="progress-dot" id="pd3"></div>
+  <div class="progress-dot" id="pd4"></div>
+</div>
+
+<div class="btn-row">
+  <button class="btn btn-ghost" onclick="resetAll()">↺ Reset</button>
+  <button class="btn btn-primary" id="check-btn" onclick="checkOrder()" disabled>Check My Order</button>
+</div>
+
+<div class="feedback" id="feedback"></div>
+
+<script>
+const QUOTES = [
+  {
+    id: 0,
+    label: 'Quote A',
+    correctPos: 1,
+    text: '"In my younger and more vulnerable years my father gave me some advice that I\'ve been turning over in my mind ever since."',
+    attr: '— Nick Carraway · Chapter 1, Opening lines'
+  },
+  {
+    id: 1,
+    label: 'Quote B',
+    correctPos: 2,
+    text: '"Across the courtesy bay the white palaces of fashionable East Egg glittered along the water, and the history of the summer really begins on the evening I drove over there to have dinner with the Tom Buchanans."',
+    attr: '— Nick Carraway · Chapter 1'
+  },
+  {
+    id: 2,
+    label: 'Quote C',
+    correctPos: 3,
+    text: '"He stretched out his arms toward the dark water in a trembling way… a single green light, minute and far away, that might have been the end of a dock."',
+    attr: '— Nick observing Gatsby · Chapter 1'
+  },
+  {
+    id: 3,
+    label: 'Quote D',
+    correctPos: 4,
+    text: '"Can\'t repeat the past?" he cried incredulously. "Why of course you can!"',
+    attr: '— Jay Gatsby · Chapter 6'
+  },
+  {
+    id: 4,
+    label: 'Quote E',
+    correctPos: 5,
+    text: '"So we beat on, boats against the current, borne back ceaselessly into the past."',
+    attr: '— Nick Carraway · Chapter 9, Final lines'
+  }
+];
+
+// Shuffle helper
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let sourceIds = [];
+let answerIds = [];
+let draggingId = null;
+let draggingFrom = null;
+
+function init() {
+  sourceIds = shuffle(QUOTES.map(q => q.id));
+  answerIds = [];
+  renderAll();
+  clearFeedback();
+}
+
+function renderAll() {
+  renderZone('source-zone', sourceIds, false);
+  renderZone('answer-zone', answerIds, true);
+  document.getElementById('bank-empty').style.display = sourceIds.length === 0 ? 'flex' : 'none';
+  document.getElementById('answer-empty').style.display = answerIds.length === 0 ? 'flex' : 'none';
+  document.getElementById('bank-count').textContent = sourceIds.length;
+  document.getElementById('answer-count').textContent = `${answerIds.length}/5`;
+  document.getElementById('check-btn').disabled = answerIds.length < 5;
+  updateDots();
+}
+
+function renderZone(zoneId, ids, showPosition) {
+  const zone = document.getElementById(zoneId);
+  [...zone.querySelectorAll('.quote-card')].forEach(el => el.remove());
+  ids.forEach((id, idx) => {
+    const q = QUOTES.find(x => x.id === id);
+    const card = document.createElement('div');
+    card.className = 'quote-card';
+    card.draggable = true;
+    card.dataset.id = id;
+    card.dataset.zone = zoneId;
+
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="quote-id-badge">${q.label}</span>
+        ${showPosition ? `<div class="position-badge">${idx + 1}</div>` : ''}
+      </div>
+      <div class="quote-text">${q.text}</div>
+      <div class="quote-attr">${q.attr}</div>
+      <span class="drag-handle">⠿</span>
+    `;
+
+    card.addEventListener('dragstart', e => {
+      draggingId = id;
+      draggingFrom = zoneId;
+      setTimeout(() => card.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+
+    zone.appendChild(card);
+  });
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+  e.dataTransfer.dropEffect = 'move';
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onDrop(e, target) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (draggingId === null) return;
+
+  const fromArr = draggingFrom === 'source-zone' ? sourceIds : answerIds;
+  const toArr   = target === 'source' ? sourceIds : answerIds;
+
+  // Remove from source
+  const fromIdx = fromArr.indexOf(draggingId);
+  if (fromIdx > -1) fromArr.splice(fromIdx, 1);
+
+  // Calculate insert position from mouse
+  const targetZoneId = target === 'source' ? 'source-zone' : 'answer-zone';
+  const cards = [...document.querySelectorAll(`#${targetZoneId} .quote-card`)];
+  let insertAt = toArr.length;
+  for (let i = 0; i < cards.length; i++) {
+    const rect = cards[i].getBoundingClientRect();
+    if (e.clientY < rect.top + rect.height / 2) { insertAt = i; break; }
+  }
+
+  toArr.splice(insertAt, 0, draggingId);
+
+  draggingId = null;
+  draggingFrom = null;
+  clearFeedback();
+  renderAll();
+}
+
+function updateDots() {
+  for (let i = 0; i < 5; i++) {
+    const dot = document.getElementById(`pd${i}`);
+    dot.className = 'progress-dot' + (i < answerIds.length ? (answerIds.length === 5 ? ' all-filled' : ' filled') : '');
+  }
+}
+
+function clearFeedback() {
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+  document.querySelectorAll('.quote-card').forEach(c => c.classList.remove('correct','incorrect'));
+}
+
+function checkOrder() {
+  if (answerIds.length < 5) return;
+
+  let correct = 0;
+  answerIds.forEach((id, idx) => {
+    const q = QUOTES.find(x => x.id === id);
+    const card = document.querySelector(`#answer-zone .quote-card[data-id="${id}"]`);
+    if (card) {
+      if (q.correctPos === idx + 1) {
+        correct++;
+        card.classList.add('correct');
+        card.classList.remove('incorrect');
+      } else {
+        card.classList.add('incorrect');
+        card.classList.remove('correct');
+      }
+    }
+  });
+
+  const fb = document.getElementById('feedback');
+  if (correct === 5) {
+    fb.className = 'feedback show success';
+    fb.innerHTML = `
+      <div class="score-line">🎉 Perfect — 5 out of 5!</div>
+      <div class="detail">Excellent work! You've correctly sequenced all five quotes. Notice how Fitzgerald structures the novel: it opens with Nick's reflective, world-weary voice, zooms in on the glittering geography of Long Island, then offers that haunting glimpse of Gatsby reaching for the green light. Gatsby's declaration that the past can be repeated sits at the novel's emotional core — and then the famous closing lines bring everything full circle, suggesting that our longing for the past is inescapable.</div>
+    `;
+  } else {
+    fb.className = 'feedback show partial';
+    fb.innerHTML = `
+      <div class="score-line">${correct} out of 5 in the right spot</div>
+      <div class="detail">Cards with an <strong style="color:#F78F1E;">orange border</strong> are in the wrong position. Try thinking about <em>when</em> in the story each quote occurs. Which chapter is it from? Where is Nick in his emotional journey? Rearrange the orange cards and try again.</div>
+    `;
+  }
+}
+
+function resetAll() {
+  init();
+}
+
+init();
+</script>
+</body>
+</html>
